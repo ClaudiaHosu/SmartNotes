@@ -1,6 +1,7 @@
 package data;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,19 +30,30 @@ public class SharedPrefsData implements Data {
 
     @Override
     public List<Note> getNotes() {
+
+        Log.d(TAG, "getNotes: called");
+
         List<Note> notes = new ArrayList<>();
 
         int notesNo = sharedPreferences.getInt(SHARED_PREFS_NOTE_COUNT_KEY, 0);
 
+        Log.d(TAG, "getNotes: NotesNo "+notesNo);
+
         if (notesNo == 0) return notes;
 
-        idIncrement = notesNo;
-        for (int i = 1; i <= notesNo; i++) {
-            Note note = gson.fromJson(sharedPreferences.getString(SHARED_PREFS_NOTE_ID_PREFIX_KEY+i, ""), Note.class);
+        int notesFound = 0;
+        int id = 0;
+        while (notesFound < notesNo) {
+            Note note = gson.fromJson(sharedPreferences.getString(SHARED_PREFS_NOTE_ID_PREFIX_KEY+(++id), ""), Note.class);
             if (note != null) {
                 notes.add(note);
+                notesFound++;
             }
         }
+
+        idIncrement = notes.get(notes.size()-1).getId();
+
+        Log.d(TAG, "getNotes: Found number of notes: " + notes.size());
 
         return notes;
     }
@@ -55,12 +67,18 @@ public class SharedPrefsData implements Data {
     @Override
     public void saveNote(Note newNote) {
 
+        boolean isInsert = false;
         int noteId = newNote.getId();
 
         if (noteId == 0) {
             noteId = ++idIncrement;
+            isInsert = true;
+            Log.d(TAG, "saveNote: Note insert detected!");
         }
+
         newNote.setId(noteId);
+
+        Log.d(TAG, "saveNote: "+newNote.getId() + " " +newNote.getTitle() + " "+ newNote.getContent());
 
         sharedPreferences.edit().putString(SHARED_PREFS_NOTE_ID_PREFIX_KEY+noteId, gson.toJson(newNote)).apply();
         Note note = gson.fromJson(sharedPreferences.getString(SHARED_PREFS_NOTE_ID_PREFIX_KEY+noteId, ""), Note.class);
@@ -69,12 +87,15 @@ public class SharedPrefsData implements Data {
             return;
         }
 
-        int notesNo = sharedPreferences.getInt(SHARED_PREFS_NOTE_COUNT_KEY, 0);
-        sharedPreferences.edit().putInt(SHARED_PREFS_NOTE_COUNT_KEY, ++notesNo).apply();
+        if (isInsert) {
+            int notesNo = sharedPreferences.getInt(SHARED_PREFS_NOTE_COUNT_KEY, 0);
+            sharedPreferences.edit().putInt(SHARED_PREFS_NOTE_COUNT_KEY, ++notesNo).apply();
+        }
     }
 
     @Override
     public void deleteNote(int id) {
+        Log.d(TAG, "deleteNote: "+id);
         sharedPreferences.edit().remove(SHARED_PREFS_NOTE_ID_PREFIX_KEY+id).apply();
         int notesNo = sharedPreferences.getInt(SHARED_PREFS_NOTE_COUNT_KEY, 0);
         sharedPreferences.edit().putInt(SHARED_PREFS_NOTE_COUNT_KEY, --notesNo).apply();

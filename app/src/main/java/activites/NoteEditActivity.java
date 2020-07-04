@@ -59,7 +59,6 @@ public class NoteEditActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        //save note - in-memory (for now)
         note.setTitle(titleText.getText().toString());
         note.setContent(contentText.getText().toString());
         data.saveNote(note);

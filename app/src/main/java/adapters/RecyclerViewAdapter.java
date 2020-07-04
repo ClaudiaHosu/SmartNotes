@@ -75,6 +75,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     }
 
+
+
     private void showDeletionDialog(View view, int position) {
         new AlertDialog.Builder(mContext)
                 .setIcon(android.R.drawable.ic_dialog_info)
@@ -83,7 +85,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d(TAG, "onClick: yes clicked");
+                        Log.d(TAG, "onClick: yes clicked "+position);
                         int noteId = (Integer) view.getTag();
                         data.deleteNote(noteId);
                         RecyclerViewAdapter.this.notifyItemRemoved(position);

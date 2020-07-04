@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume: resume called");
         recyclerView.getAdapter().notifyDataSetChanged();
         super.onResume();
     }
