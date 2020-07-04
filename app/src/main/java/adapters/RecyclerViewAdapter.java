@@ -17,7 +17,7 @@ import com.example.smartnotes.R;
 
 import java.util.List;
 
-import models.Note;
+import entities.Note;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 

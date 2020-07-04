@@ -7,10 +7,8 @@ import android.widget.EditText;
 
 import com.example.smartnotes.R;
 
-import data.AppDatabase;
-import data.NoteDao;
 import data.NoteRepository;
-import models.Note;
+import entities.Note;
 
 public class NoteEditActivity extends AppCompatActivity {
 

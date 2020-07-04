@@ -11,9 +11,8 @@ import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import models.Note;
+import entities.Note;
 
 public class SharedPrefsNoteDao implements NoteDao {
 

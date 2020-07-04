@@ -1,6 +1,5 @@
 package data;
 
-import android.content.Context;
 import android.util.Log;
 
 
@@ -9,9 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import models.Note;
+import entities.Note;
 
 public class InMemoryNoteDao implements NoteDao {
 
