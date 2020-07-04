@@ -28,9 +28,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private View.OnClickListener onNoteDeleteListener;
     private View.OnClickListener onNoteEditListener;
 
-    public RecyclerViewAdapter(Context mContext, List<Note> notes) {
+    public RecyclerViewAdapter(Context mContext) {
         this.mContext = mContext;
-        this.notes = notes;
     }
 
     @NonNull
@@ -96,7 +95,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: "+ notes.size());
+        if (notes == null) {
+            return 0;
+        }
         return notes.size();
     }
 
@@ -110,6 +111,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public List<Note> getNotes() {
         return notes;
+    }
+
+    public void setNotes(List<Note> notes) {
+        this.notes = notes;
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

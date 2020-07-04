@@ -2,6 +2,7 @@ package activites;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,17 +19,18 @@ import com.example.smartnotes.R;
 import java.util.List;
 
 import adapters.RecyclerViewAdapter;
-import data.Data;
-import data.SharedPrefsData;
+import data.AppDatabase;
+import data.NoteDao;
+import data.NoteRepository;
 import models.Note;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Data data;
+    private NoteRepository noteRepository;
     private RecyclerView recyclerView;
-    private boolean noteAdded;
+    //private boolean noteAdded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.d(TAG, "onCreate: started");
-        data = SharedPrefsData.getInstance(getSharedPreferences("activites", MODE_PRIVATE));
+        noteRepository = NoteRepository.getInstance(this);
         initRecyclerView();
     }
 
@@ -44,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         Log.d(TAG, "onResume: resume called");
 
-        if (noteAdded) {
-            List<Note> notes = data.getNotes();
-            if (notes.size() == 0) return;
-            ((RecyclerViewAdapter) recyclerView.getAdapter()).getNotes().add(notes.get(notes.size()-1));
-            recyclerView.getAdapter().notifyDataSetChanged();
-            noteAdded = false;
-        }
+        /*if (noteAdded) {
+            noteRepository.getNotes().observe(this, notes -> {
+                if (notes.size() == 0) return;
+                ((RecyclerViewAdapter) recyclerView.getAdapter()).getNotes().add(notes.get(notes.size()-1));
+                recyclerView.getAdapter().notifyDataSetChanged();
+                noteAdded = false;
+            });
+        }*/
 
         super.onResume();
     }
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.addNote:
                 Intent intent = new Intent(this, NoteEditActivity.class);
                 startActivity(intent);
-                noteAdded = true;
+                //noteAdded = true;
                 return true;
         }
 
@@ -83,14 +86,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "initRecyclerView: called");
 
         recyclerView = findViewById(R.id.recyclerView);
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(this, data.getNotes());
+        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(this);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewAdapter.setOnNoteDeleteListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int noteId = (Integer) view.getTag();
-                data.deleteNote(noteId);
+                Note note = new Note();
+                note.setId(noteId);
+                noteRepository.deleteNote(note);
             }
         });
         recyclerViewAdapter.setOnNoteEditListener(new View.OnClickListener() {
@@ -102,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        noteRepository.getNotes().observe(this, notes -> {
+            recyclerViewAdapter.setNotes(notes);
+        });
+
+
+
     }
     
 }

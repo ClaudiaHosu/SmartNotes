@@ -1,7 +1,11 @@
 package data;
 
+import android.content.Context;
 import android.util.Log;
 
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,16 +13,16 @@ import java.util.Optional;
 
 import models.Note;
 
-public class InMemoryData implements Data {
+public class InMemoryNoteDao implements NoteDao {
 
     private static final String TAG = "InMemoryData";
 
-    private static Data data;
+    private static NoteDao noteDao;
 
     private static List<Note> notes = new ArrayList<>();
     private int idIncrement = 0;
 
-    private InMemoryData() {
+    private InMemoryNoteDao() {
         initData();
     }
 
@@ -40,12 +44,17 @@ public class InMemoryData implements Data {
         notes.add(note4);
     }
 
-        public List<Note> getNotes() {
-            return notes;
+        public LiveData<List<Note>> getNotes() {
+            MutableLiveData<List<Note>> notesLiveData = new MutableLiveData<>();
+            notesLiveData.setValue(notes);
+            return notesLiveData;
         }
 
-        public Optional<Note> findNoteById(int id) {
-            return notes.stream().filter( note -> note.getId() == id).findFirst();
+        public LiveData<Note> findNoteById(int id) {
+            Note foundNote = notes.stream().filter( note -> note.getId() == id).findFirst().orElse(null);
+            MutableLiveData<Note> noteLiveData = new MutableLiveData<>();
+            noteLiveData.setValue(foundNote);
+            return noteLiveData;
         }
 
         public void saveNote(Note newNote) {
@@ -62,18 +71,23 @@ public class InMemoryData implements Data {
 
         }
 
-        public void deleteNote(int id) {
-            notes.removeIf( note -> note.getId() == id);
+    @Override
+    public void updateNote(Note updatedNote) {
+        saveNote(updatedNote);
+    }
+
+    public void deleteNote(Note noteToDelete) {
+            notes.removeIf( note -> note.getId() == noteToDelete.getId());
         }
 
 
 
-        public static Data getInstance() {
-            if (data == null) {
-                data = new InMemoryData();
+        public static NoteDao getInstance() {
+            if (noteDao == null) {
+                noteDao = new InMemoryNoteDao();
             }
 
-            return data;
+            return noteDao;
         }
 
 }

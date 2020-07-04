@@ -7,9 +7,9 @@ import android.widget.EditText;
 
 import com.example.smartnotes.R;
 
-import data.Data;
-import data.InMemoryData;
-import data.SharedPrefsData;
+import data.AppDatabase;
+import data.NoteDao;
+import data.NoteRepository;
 import models.Note;
 
 public class NoteEditActivity extends AppCompatActivity {
@@ -17,7 +17,7 @@ public class NoteEditActivity extends AppCompatActivity {
     private static final String TAG = "NoteEditActivity";
     public static final String EXTRA_KEY = "note_id";
 
-    private Data data;
+    private NoteRepository noteRepository;
     private Note note;
 
     private EditText titleText;
@@ -28,7 +28,8 @@ public class NoteEditActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_edit);
-        data = SharedPrefsData.getInstance(getSharedPreferences("activites", MODE_PRIVATE));
+        //noteDao = SharedPrefsNoteDao.getInstance(getSharedPreferences("activites", MODE_PRIVATE));
+        noteRepository = NoteRepository.getInstance(this);
         initNote();
     }
 
@@ -45,15 +46,16 @@ public class NoteEditActivity extends AppCompatActivity {
         }
 
         int noteId = extras.getInt(EXTRA_KEY);
-        note = data.findNoteById(noteId).get();
+        noteRepository.findNoteById(noteId).observe(this, foundNote -> {
+            if (foundNote == null) {
+                note = new Note();
+                return;
+            }
+            note = foundNote;
 
-        if (note == null) {
-            note = new Note();
-            return;
-        }
-
-        titleText.setText(note.getTitle());
-        contentText.setText(note.getContent());
+            titleText.setText(note.getTitle());
+            contentText.setText(note.getContent());
+        });
     }
 
     @Override
@@ -61,8 +63,7 @@ public class NoteEditActivity extends AppCompatActivity {
 
         note.setTitle(titleText.getText().toString());
         note.setContent(contentText.getText().toString());
-        data.saveNote(note);
-
+        noteRepository.saveNote(note);
         super.onBackPressed();
 
     }

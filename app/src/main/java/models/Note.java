@@ -1,9 +1,19 @@
 package models;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class Note {
 
+    @PrimaryKey(autoGenerate = true)
     private int id;
+
+    @ColumnInfo(name = "title")
     private String title;
+
+    @ColumnInfo(name = "content")
     private String content;
 
     public Note() {
