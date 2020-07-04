@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.smartnotes.R;
 
@@ -56,12 +57,16 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.addNote:
-                Intent intent = new Intent(this, NoteEditActivity.class);
-                startActivity(intent);
+                addNote(item.getActionView());
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void addNote(View view) {
+        Intent intent = new Intent(this, NoteEditActivity.class);
+        startActivity(intent);
     }
 
     private void initRecyclerView() {

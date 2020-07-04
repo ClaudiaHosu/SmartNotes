@@ -3,6 +3,7 @@ package activites;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 
 import com.example.smartnotes.R;
@@ -56,12 +57,16 @@ public class NoteEditActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-
+    public void saveNote(View view) {
         note.setTitle(titleText.getText().toString());
         note.setContent(contentText.getText().toString());
         noteRepository.saveNote(note);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveNote(this.getCurrentFocus());
         super.onBackPressed();
 
     }
