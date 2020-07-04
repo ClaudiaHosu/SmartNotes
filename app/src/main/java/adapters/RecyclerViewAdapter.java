@@ -2,8 +2,6 @@ package adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,23 +17,20 @@ import com.example.smartnotes.R;
 
 import java.util.List;
 
-import activites.NoteEditActivity;
-import data.Data;
-import data.SharedPrefsData;
 import models.Note;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     private static final String TAG = "RecyclerViewAdapter";
 
     private Context mContext;
-    private Data data;
+    private List<Note> notes;
+    private View.OnClickListener onNoteDeleteListener;
+    private View.OnClickListener onNoteEditListener;
 
     public RecyclerViewAdapter(Context mContext, List<Note> notes) {
         this.mContext = mContext;
-        this.data = SharedPrefsData.getInstance(mContext.getSharedPreferences("activites", MODE_PRIVATE));
+        this.notes = notes;
     }
 
     @NonNull
@@ -50,7 +45,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: called");
 
-        Note note = data.getNotes().get(position);
+        Note note = notes.get(position);
         if (note == null) return;
 
         holder.getParentLayout().setTag(note.getId());
@@ -59,9 +54,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked on "+ note.getTitle());
-                Intent intent = new Intent(mContext, NoteEditActivity.class);
-                intent.putExtra(NoteEditActivity.EXTRA_KEY, note.getId());
-                mContext.startActivity(intent);
+                onNoteEditListener.onClick(view);
             }
         });
         holder.getParentLayout().setOnLongClickListener(new View.OnLongClickListener() {
@@ -86,9 +79,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Log.d(TAG, "onClick: yes clicked "+position);
-                        int noteId = (Integer) view.getTag();
-                        data.deleteNote(noteId);
+                        notes.remove(position);
                         RecyclerViewAdapter.this.notifyItemRemoved(position);
+                        onNoteDeleteListener.onClick(view);
                     }
                 })
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -103,8 +96,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: "+ data.getNotes().size());
-        return data.getNotes().size();
+        Log.d(TAG, "getItemCount: "+ notes.size());
+        return notes.size();
+    }
+
+    public void setOnNoteDeleteListener(View.OnClickListener onNoteDeleteListener) {
+        this.onNoteDeleteListener = onNoteDeleteListener;
+    }
+
+    public void setOnNoteEditListener(View.OnClickListener onNoteEditListener) {
+        this.onNoteEditListener = onNoteEditListener;
+    }
+
+    public List<Note> getNotes() {
+        return notes;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

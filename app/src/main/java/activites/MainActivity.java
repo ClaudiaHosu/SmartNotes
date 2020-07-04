@@ -11,12 +11,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.smartnotes.R;
+
+import java.util.List;
 
 import adapters.RecyclerViewAdapter;
 import data.Data;
 import data.SharedPrefsData;
+import models.Note;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Data data;
     private RecyclerView recyclerView;
+    private boolean noteAdded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +43,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume: resume called");
-        recyclerView.getAdapter().notifyDataSetChanged();
+
+        if (noteAdded) {
+            List<Note> notes = data.getNotes();
+            if (notes.size() == 0) return;
+            ((RecyclerViewAdapter) recyclerView.getAdapter()).getNotes().add(notes.get(notes.size()-1));
+            recyclerView.getAdapter().notifyDataSetChanged();
+            noteAdded = false;
+        }
+
         super.onResume();
     }
 
@@ -59,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.addNote:
                 Intent intent = new Intent(this, NoteEditActivity.class);
                 startActivity(intent);
+                noteAdded = true;
                 return true;
         }
 
@@ -72,6 +86,22 @@ public class MainActivity extends AppCompatActivity {
         RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(this, data.getNotes());
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAdapter.setOnNoteDeleteListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int noteId = (Integer) view.getTag();
+                data.deleteNote(noteId);
+            }
+        });
+        recyclerViewAdapter.setOnNoteEditListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, NoteEditActivity.class);
+                int noteId = (Integer) view.getTag();
+                intent.putExtra(NoteEditActivity.EXTRA_KEY, noteId);
+                startActivity(intent);
+            }
+        });
     }
     
 }
